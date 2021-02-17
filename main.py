@@ -4,12 +4,14 @@ from tkinter import *
 from tkinter import ttk
 
 
-GREEN = '#216954'
-BG_COLOR = '#faf6e9'
-QUESTION_COLOR = '#fffdf6'
-FONT_COLOR = '#333333'
+GREEN = '#5eaaa8'
+ORANGE = '#eb5e0b'
+BG_COLOR = '#deeded'
+QUESTION_COLOR = '#eef7f5'
+FONT_COLOR = '#2f2519'
 FONT = 'Verdana'
-LOGO = 'logo.png'
+LOGO = 'new_logo.png'
+ICO = 'new_ico.ico'
 
 URL = 'https://opentdb.com/api.php?'
 AMOUNT = 10
@@ -44,6 +46,7 @@ def get_question_base(category, difficulty):
 
 
 def ask_question():
+    number_label.config(text=f'#{question_num+1}')
     button.config(text='Check', command=check_answer)
     true.config(state=NORMAL)
     false.config(state=NORMAL)
@@ -53,12 +56,14 @@ def ask_question():
 
 
 def check_answer():
-    global question_num
+    global question_num, score
     correct_answer = question_base[question_num]['correct_answer']
     user_answer = answer.get()
     question_field.insert(END, "\n**********\n")
     if user_answer == correct_answer:
         question_field.insert(END, "You got it right!\n")
+        score += 1
+        score_label.config(text=f'Score: {score}')
     else:
         question_field.insert(END, "That's wrong...\n")
     question_field.insert(END, f"The correct answer was: {correct_answer}.")
@@ -66,8 +71,14 @@ def check_answer():
     true.config(state=DISABLED)
     false.config(state=DISABLED)
     question_num += 1
-    # if question_num == len(question_base):
-    #     end_quiz()
+    if question_num == len(question_base):
+        end_quiz()
+
+
+def end_quiz():
+    button.config(text='Exit', command=root.destroy)
+    question_field.insert(END, "\n**********\nYou've done it!\n")
+    question_field.insert(END, f"Your final score is {score}/{len(question_base)}")
 
 
 # Dialog window. Selection of category and difficulty
@@ -75,7 +86,7 @@ dialog = Tk()
 dialog.geometry('+350+250')
 dialog.resizable(width=False, height=False)
 dialog.title('QuizGame settings')
-dialog.iconbitmap('ico.ico')
+dialog.iconbitmap(ICO)
 
 main_frame = Frame(dialog, padx=20, pady=10, bg=BG_COLOR)
 main_frame.grid(row=0, column=0)
@@ -110,7 +121,7 @@ medium.config(activebackground=BG_COLOR)
 medium.grid(row=2, column=2, pady=10)
 
 button = Button(main_frame, text='OK', width=10, command=select)
-button.config(font=(FONT, 10, 'bold'), bg=GREEN, fg=BG_COLOR)
+button.config(font=(FONT, 10, 'bold'), bg=ORANGE, fg=QUESTION_COLOR)
 button.config(bd=3, activebackground=BG_COLOR, activeforeground=FONT_COLOR)
 button.grid(row=3, column=1, pady=10)
 
@@ -120,38 +131,47 @@ dialog.mainloop()
 root = Tk()
 root.geometry('+350+250')
 root.title('QuizGame')
-root.iconbitmap('ico.ico')
+root.iconbitmap(ICO)
 
 main_frame = Frame(root, padx=40, pady=20, bg=BG_COLOR)
 main_frame.grid(row=0, column=0)
 
-logo_image = PhotoImage(file='logo.png')
+logo_image = PhotoImage(file=LOGO)
 logo = Label(main_frame, image=logo_image, bg=BG_COLOR)
 logo.grid(row=0, column=0, columnspan=4, pady=30)
+
+question_num = 0
+number_label = Label(main_frame, text=f'#{question_num+1}', width=4)
+number_label.config(font=(FONT, 10, 'bold'), bg=GREEN, fg=QUESTION_COLOR)
+number_label.grid(row=1, column=0, sticky=W, padx=12)
+
+score = 0
+score_label = Label(main_frame, text=f'Score: {score}', width=16)
+score_label.config(font=(FONT, 10, 'bold'), bg=GREEN, fg=QUESTION_COLOR)
+score_label.grid(row=1, column=2, columnspan=2, padx=16)
 
 question_field = Text(main_frame, width=40, height=10, wrap=WORD)
 question_field.config(font=(FONT, 10, 'normal'), bg=QUESTION_COLOR, fg=FONT_COLOR)
 question_field.config(relief='flat', highlightthickness=3, borderwidth=6)
 question_field.config(highlightbackground=GREEN, highlightcolor=GREEN)
-question_field.grid(row=1, column=0, columnspan=4)
+question_field.grid(row=2, column=0, columnspan=4)
 
 answer = StringVar(value='True')
 true = Radiobutton(main_frame, text='True', variable=answer, value='True')
 true.config(font=(FONT, 10, 'normal'), bg=BG_COLOR, fg=FONT_COLOR)
 true.config(activebackground=BG_COLOR)
-true.grid(row=2, column=0, columnspan=2, pady=10)
+true.grid(row=3, column=0, columnspan=2, pady=10)
 false = Radiobutton(main_frame, text='False', variable=answer, value='False')
 false.config(font=(FONT, 10, 'normal'), bg=BG_COLOR, fg=FONT_COLOR)
 false.config(activebackground=BG_COLOR)
-false.grid(row=2, column=2, columnspan=2, pady=10)
+false.grid(row=3, column=2, columnspan=2, pady=10)
 
 button = Button(main_frame, text='Check', width=15, command=check_answer)
-button.config(font=(FONT, 10, 'bold'), bg=GREEN, fg=BG_COLOR)
+button.config(font=(FONT, 10, 'bold'), bg=ORANGE, fg=QUESTION_COLOR)
 button.config(bd=3, activebackground=BG_COLOR, activeforeground=FONT_COLOR)
-button.grid(row=3, column=1, columnspan=2, pady=10)
+button.grid(row=4, column=1, columnspan=2, pady=10)
 
 question_base = get_question_base(category, difficulty)
-question_num = 0
 ask_question()
 
 root.mainloop()
